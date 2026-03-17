@@ -1,0 +1,108 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.desc {
+  margin: 0 0 12px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+  outline: none;
+  background: white;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.actions.row button {
+  flex: 1;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+  flex: 1;
+}
+
+.stepCard {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+#stepBadge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.guideTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stepInstruction {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.6;
+  min-height: 42px;
+}
+
+#status {
+  white-space: pre-wrap;
+  font-size: 12px;
+  color: #334155;
+  margin-top: 12px;
+  line-height: 1.5;
+}

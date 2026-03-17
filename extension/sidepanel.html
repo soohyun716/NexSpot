@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NexSpot</title>
+    <link rel="stylesheet" href="./sidepanel.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>넥스팟</h1>
+      <p class="desc">
+        어려운 UI를 쉽게 찾도록 넥스팟이 도와드릴게요.<br />
+      </p>
+
+      <textarea
+        id="requestInput"
+        placeholder="예: GitHub 토큰 발급 방법 알려줘"
+      ></textarea>
+
+      <div class="actions">
+        <button id="generateBtn" class="primary">가이드 생성</button>
+        <button id="resumeBtn">이 페이지에서 이어서 실행</button>
+      </div>
+
+      <div class="stepCard">
+        <div class="stepHeader">
+          <span id="stepBadge">단계 정보 없음</span>
+        </div>
+        <div id="guideTitle" class="guideTitle">가이드 없음</div>
+        <div id="stepInstruction" class="stepInstruction">
+          아직 실행 중인 단계가 없습니다.
+        </div>
+      </div>
+
+      <div class="actions row">
+        <button id="prevBtn">이전 단계</button>
+        <button id="nextBtn">다음 단계</button>
+        <button id="clearBtn">닫기</button>
+      </div>
+
+      <pre id="status"></pre>
+    </div>
+
+    <script src="./sidepanel.js"></script>
+  </body>
+</html>
