@@ -156,7 +156,7 @@ http://localhost:4000/health
 
 ## Demo
 
-(Colab 또는 시연 영상 링크 추가)
+https://youtu.be/1AScf0QpCyU
 
 ---
 
