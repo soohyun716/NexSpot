@@ -10,8 +10,14 @@
     retryTimer: null,
     rafId: null,
     boundTarget: null,
-    boundHandler: null
+    boundHandler: null,
+
+    guideSignature: null,
+    interactionLock: null,
+    interactionLockTimer: null
+
   };
+
 
   const ROOT_ID = "nexspot-root";
   const MAX_RETRIES = 3;
@@ -142,6 +148,73 @@
     }
   }
 
+
+
+  function clearInteractionLockTimer() {
+    if (STATE.interactionLockTimer) {
+      clearTimeout(STATE.interactionLockTimer);
+      STATE.interactionLockTimer = null;
+    }
+  }
+
+  function setInteractionLock(lock) {
+    clearInteractionLockTimer();
+    STATE.interactionLock = lock;
+
+    if (lock) {
+      STATE.interactionLockTimer = setTimeout(() => {
+        STATE.interactionLock = null;
+        STATE.interactionLockTimer = null;
+      }, 2500);
+    }
+  }
+
+  function clearInteractionLock() {
+    clearInteractionLockTimer();
+    STATE.interactionLock = null;
+  }
+
+  function getGuideSignature(guide) {
+    if (!guide?.steps?.length) return "empty-guide";
+
+    return guide.steps
+      .map((step, index) => `${step?.id ?? index + 1}:${normalizeText(step?.instruction || "")}`)
+      .join("|");
+  }
+
+  function clampStepIndex(nextIndex, guideLength) {
+    if (!Number.isInteger(nextIndex)) return 0;
+    if (guideLength <= 0) return 0;
+    if (nextIndex < 0) return 0;
+    if (nextIndex > guideLength - 1) return guideLength - 1;
+    return nextIndex;
+  }
+
+  function sanitizeIncomingStepIndex(payloadIndex, incomingGuide) {
+    const nextGuideLength = incomingGuide?.steps?.length || 0;
+    const incomingClamped = clampStepIndex(payloadIndex || 0, nextGuideLength);
+    const incomingSignature = getGuideSignature(incomingGuide);
+    const sameGuide = incomingSignature === STATE.guideSignature;
+
+    if (!sameGuide) return incomingClamped;
+
+    const currentIndex = clampStepIndex(
+      STATE.currentStepIndex || 0,
+      STATE.guide?.steps?.length || 0
+    );
+
+    // 같은 가이드에서 한 번에 여러 단계 점프 방지
+    if (incomingClamped > currentIndex + 1) {
+      return currentIndex + 1;
+    }
+
+    return incomingClamped;
+  }
+
+
+
+
+
   function findClickableParent(el) {
     let node = el;
 
@@ -209,7 +282,7 @@
         for (const el of found) {
           results.push(findClickableParent(el));
         }
-      } catch (error) {}
+      } catch (error) { }
     }
 
     if (results.length < 12) {
@@ -234,7 +307,7 @@
     for (const selector of hints.selectors || []) {
       try {
         if (selector && el.matches(selector)) score += 70;
-      } catch (error) {}
+      } catch (error) { }
     }
 
     for (const targetText of hints.texts || []) {
@@ -308,6 +381,10 @@
     STATE.boundHandler = null;
   }
 
+
+
+
+
   function bindStepAction(step, target) {
     clearBindings();
 
@@ -316,11 +393,39 @@
     const actionType = step.action.type;
     if (!["click_then_navigate", "click_then_wait_dom"].includes(actionType)) return;
 
+    const expectedStepId = step.id;
+    const expectedStepIndex = STATE.currentStepIndex;
+    const expectedGuideSignature = STATE.guideSignature;
+
     const handler = () => {
+      const currentStep = getCurrentStep();
+
+      // 오래된 바인딩(stale binding) 무시
+      if (!currentStep) return;
+      if (STATE.guideSignature !== expectedGuideSignature) return;
+      if (STATE.currentStepIndex !== expectedStepIndex) return;
+      if (currentStep.id !== expectedStepId) return;
+
+      // 같은 step에서 중복 클릭 전송 방지
+      if (
+        STATE.interactionLock &&
+        STATE.interactionLock.stepId === expectedStepId &&
+        STATE.interactionLock.actionType === actionType
+      ) {
+        return;
+      }
+
+      setInteractionLock({
+        stepId: expectedStepId,
+        stepIndex: expectedStepIndex,
+        actionType
+      });
+
       chrome.runtime.sendMessage({
         type: "NEXSPOT_STEP_INTERACTION",
         payload: {
-          stepId: step.id,
+          stepId: expectedStepId,
+          stepIndex: expectedStepIndex,
           actionType
         }
       });
@@ -334,6 +439,9 @@
     STATE.boundTarget = target;
     STATE.boundHandler = handler;
   }
+
+
+
 
   function ensureRoot() {
     if (rootEl && document.documentElement.contains(rootEl)) return;
@@ -617,16 +725,33 @@
     clearRetryTimer();
     clearRaf();
     clearBindings();
+    clearInteractionLock();
   }
+
+
+
 
   function setStateFromPayload(payload) {
     clearTimersAndBindings();
 
-    STATE.guide = payload.guide || null;
-    STATE.currentStepIndex = payload.currentStepIndex || 0;
+    const nextGuide = payload.guide || null;
+    const nextGuideSignature = getGuideSignature(nextGuide);
+    const nextStepIndex = sanitizeIncomingStepIndex(
+      payload.currentStepIndex || 0,
+      nextGuide
+    );
+
+    STATE.guide = nextGuide;
+    STATE.guideSignature = nextGuideSignature;
+    STATE.currentStepIndex = nextStepIndex;
+
+    // step이 갱신되면 이전 클릭 잠금 해제
+    clearInteractionLock();
 
     renderStepAttempt(0);
   }
+
+
 
   function clearGuide() {
     clearTimersAndBindings();
@@ -635,7 +760,9 @@
     STATE.currentStepIndex = 0;
     STATE.tooltipHidden = false;
     STATE.stepTargetCache.clear();
-
+    STATE.guideSignature = null;
+    clearInteractionLock();
+    
     if (rootEl && rootEl.parentNode) {
       rootEl.parentNode.removeChild(rootEl);
     }

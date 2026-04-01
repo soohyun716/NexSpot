@@ -14,10 +14,13 @@
   ],
   "host_permissions": [
     "http://localhost:4000/*",
-    "https://github.com/*"
+    "https://github.com/*",
+    "https://www.figma.com/*",
+    "https://www.notion.so/*"
+
   ],
   "background": {
-    "service_worker": "service-worker.ts",
+    "service_worker": "service-worker.js",
     "type": "module"
   },
   "action": {

@@ -11,7 +11,7 @@ async function getActiveTab() {
 
 async function ensureContentScriptInjected(tabId) {
   try {
-    await chrome.tabs.sendMessage(tabId, { type: "NEXPOT_PING" });
+    await chrome.tabs.sendMessage(tabId, { type: "NEXSPOT_PING" });
   } catch (error) {
     await chrome.scripting.executeScript({
       target: { tabId },
