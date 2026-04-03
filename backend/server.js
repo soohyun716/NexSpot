@@ -55,29 +55,47 @@ function buildSystemPrompt() {
     }
   ]
 }
-
-규칙:
-1. blocked는 안전한 일반 UI 탐색 요청이면 항상 false.
-2. reason은 blocked가 false면 null.
-3. guideTitle은 사용자가 하려는 작업을 짧게 요약.
-4. meta.source는 반드시 "openai".
-5. steps는 1~8개 정도.
-6. GitHub 초보자도 이해할 수 있도록 instruction은 친절하고 짧게.
-7. selectors는 가능한 GitHub에서 자주 등장할 법한 후보를 1~4개 작성.
-7.1. 단순히 "button"이렇게만 쓰지 말고 어떤 텍스트를 포함하는지 구체적으로 작성해라. 
-7.2. 프로필 메뉴(아바타), 프로필 아이콘은 클릭하는 경우 selectors는 "button[aria-haspopup='menu']"이다.
-7.3. GitHub 오른쪽 상단의 + 버튼(Create 메뉴)을 찾는 단계인 경우 selectors의 selectors는 "button[aria-labelledby*='global-create']"이다.
-7.4. 네비바의 왼쪽 상단을 찾는 경우 selectors는 "button[aria-haspopup='dialog']"이다.
-8. texts는 실제 버튼/메뉴에 적힐 가능성이 높은 텍스트를 넣어라.
-9. roles는 button, link, textbox, radio, summary, input, menuitem 등으로 작성.
-10. 삭제, 설정 변경, 생성 같은 작업도 UI 탐색 안내 차원에서 허용한다.
-11. 사용자의 질문이 GitHub와 직접 관련이 없어도, 현재 MVP 대상은 GitHub라고 가정하고 가장 가까운 GitHub UI 작업으로 안내해라.
-12. JSON 유효성을 반드시 지켜라.
-13. 토글 형식으로 되어있는 버튼이라면 action은 click_then_wait_dom이어야 한다. 
-13.1. 네비바 내부의 요소들은 대부분 action이 click_then_wait_dom이다.
+Rules:
+1. "blocked" must always be false for safe, general UI navigation requests.
+2. "reason" must be null if "blocked" is false.
+3. "guideTitle" should briefly summarize the user's intended task.
+4. "meta.source" must always be "openai".
+5. "steps" should contain approximately 1 to 8 steps.
+6. "instruction" should be concise and beginner-friendly for GitHub users.
+7. "selectors" should include 1 to 4 likely candidates commonly found in GitHub UI.
+7.1. Avoid generic selectors like "button"; instead, specify identifiable attributes such as text content.
+7.2. When clicking the profile menu (avatar), use the selector: "button[aria-haspopup='menu']".
+7.3. When locating the GitHub global "+" (Create) button, use: "button[aria-labelledby*='global-create']".
+7.4. When locating the top-left navigation button, use: "button[aria-haspopup='dialog']".
+8. "texts" should include realistic labels that are likely to appear on actual buttons or menus.
+9. "roles" should be specified as one of: button, link, textbox, radio, summary, input, menuitem, etc.
+10. Actions such as delete, update settings, or create are allowed as long as they are part of UI navigation guidance.
+11. Even if the user's request is not directly related to GitHub, assume GitHub as the MVP context and guide the closest relevant GitHub UI action.
+12. Ensure the JSON format is always valid.
+13. If the UI element is a toggle-type button, the action must be "click_then_wait_dom".
+13.1. Most elements within navigation menus should use "click_then_wait_dom" as the action.
 `;
 }
 
+// 규칙:
+// 1. blocked는 안전한 일반 UI 탐색 요청이면 항상 false.
+// 2. reason은 blocked가 false면 null.
+// 3. guideTitle은 사용자가 하려는 작업을 짧게 요약.
+// 4. meta.source는 반드시 "openai".
+// 5. steps는 1~8개 정도.
+// 6. GitHub 초보자도 이해할 수 있도록 instruction은 친절하고 짧게.
+// 7. selectors는 가능한 GitHub에서 자주 등장할 법한 후보를 1~4개 작성.
+// 7.1. 단순히 "button"이렇게만 쓰지 말고 어떤 텍스트를 포함하는지 구체적으로 작성해라. 
+// 7.2. 프로필 메뉴(아바타), 프로필 아이콘은 클릭하는 경우 selectors는 "button[aria-haspopup='menu']"이다.
+// 7.3. GitHub 오른쪽 상단의 + 버튼(Create 메뉴)을 찾는 단계인 경우 selectors의 selectors는 "button[aria-labelledby*='global-create']"이다.
+// 7.4. 네비바의 왼쪽 상단을 찾는 경우 selectors는 "button[aria-haspopup='dialog']"이다.
+// 8. texts는 실제 버튼/메뉴에 적힐 가능성이 높은 텍스트를 넣어라.
+// 9. roles는 button, link, textbox, radio, summary, input, menuitem 등으로 작성.
+// 10. 삭제, 설정 변경, 생성 같은 작업도 UI 탐색 안내 차원에서 허용한다.
+// 11. 사용자의 질문이 GitHub와 직접 관련이 없어도, 현재 MVP 대상은 GitHub라고 가정하고 가장 가까운 GitHub UI 작업으로 안내해라.
+// 12. JSON 유효성을 반드시 지켜라.
+// 13. 토글 형식으로 되어있는 버튼이라면 action은 click_then_wait_dom이어야 한다. 
+// 13.1. 네비바 내부의 요소들은 대부분 action이 click_then_wait_dom이다.
 
 /**
  * OpenAI Structured Outputs용 JSON Schema
